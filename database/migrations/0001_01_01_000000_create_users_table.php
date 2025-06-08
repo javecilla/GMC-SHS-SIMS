@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -11,15 +12,70 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
-            $table->timestamps();
+        DB::statement('CREATE OR REPLACE FUNCTION update_timestamp()
+            RETURNS TRIGGER AS $$
+            BEGIN
+                NEW.updated_at = CURRENT_TIMESTAMP;
+                RETURN NEW;
+            END;
+            $$ LANGUAGE plpgsql;
+        ');
+
+        DB::statement('CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;');
+
+        Schema::create('user_roles', function (Blueprint $table) {
+            $table->id()->primary();
+            $table->string('role_name', 50)->unique()->nullable(false);
+            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP'));
         });
+
+        DB::statement('CREATE TRIGGER update_user_roles_timestamp
+            BEFORE UPDATE ON user_roles
+            FOR EACH ROW
+            EXECUTE FUNCTION update_timestamp();
+        ');
+
+        DB::statement("
+            DO $$
+            BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_status') THEN
+                    CREATE TYPE user_status AS ENUM ('Active', 'Inactive');
+                END IF;
+            END$$;
+        ");
+
+
+        Schema::create('users', function (Blueprint $table) {
+            $table->id()->primary();
+            $table->unsignedBigInteger('role')->nullable(false);
+
+            $table->uuid('user_uid')->default(DB::raw('uuid_generate_v4()'))->unique();
+            $table->string('email', 100)->unique()->nullable(false);
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('username', 100)->unique()->nullable(false);
+            $table->string('password', 255)->nullable(false);
+            $table->string('image_profile', 255)->nullable(true);
+            // $table->enum('status', ['Active', 'Inactive'])->default('Inactive');
+            $table->timestamp('first_login_at')->nullable(true);
+
+            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+
+            $table->foreign('role')
+                ->references('id')
+                ->on('user_roles')
+                ->onUpdate('cascade')
+                ->onDelete('restrict');
+        });
+
+        DB::statement("ALTER TABLE users ADD COLUMN status user_status DEFAULT 'Inactive' NOT NULL");
+
+        DB::statement('CREATE TRIGGER update_users_timestamp
+            BEFORE UPDATE ON users
+            FOR EACH ROW
+            EXECUTE FUNCTION update_timestamp();
+        ');
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
@@ -42,8 +98,15 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
+        DB::statement('DROP TRIGGER IF EXISTS update_user_roles_timestamp ON user_roles;');
+        DB::statement('DROP TRIGGER IF EXISTS update_users_timestamp ON users;');
+
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('user_roles');
+        Schema::dropIfExists('users');
+       
+        DB::statement('DROP TYPE IF EXISTS user_status;');
+        DB::statement('DROP FUNCTION IF EXISTS update_timestamp();');
     }
 };
