@@ -21,6 +21,12 @@ return new class extends Migration
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP'));
         });
 
+        // To ensure that only one row in the school_years table can have is_current = TRUE at any time
+        DB::statement('CREATE UNIQUE INDEX school_years_single_current
+            ON school_years ((1))
+            WHERE is_current = TRUE;
+        ');
+
         DB::statement('CREATE TRIGGER update_school_years_timestamp
             BEFORE UPDATE ON school_years
             FOR EACH ROW
@@ -36,5 +42,7 @@ return new class extends Migration
         DB::statement('DROP TRIGGER IF EXISTS update_school_years_timestamp ON school_years;');
 
         Schema::dropIfExists('school_years');
+
+        DB::statement('DROP INDEX IF EXISTS school_years_single_current;');
     }
 };
