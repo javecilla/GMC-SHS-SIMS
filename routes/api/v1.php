@@ -6,6 +6,11 @@ use App\Http\Controllers\Api\V1\SemesterController;
 use App\Http\Controllers\Api\V1\YearLevelController;
 use App\Http\Controllers\Api\V1\StrandController;
 use App\Http\Controllers\Api\V1\SectionController;
+use App\Http\Controllers\Api\V1\SubjectController;
+use App\Http\Controllers\Api\V1\UserRoleController;
+use App\Http\Controllers\Api\V1\EmployeePositionController;
+use App\Http\Controllers\Api\V1\ScheduleCategoryController;
+use App\Http\Controllers\Api\V1\SubjectCategoryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,9 +31,9 @@ Route::middleware(['throttle:api-public'])->group(function () {
     Route::get('/list', 'index')->name('school-year.list');
     Route::post('/store', 'store')->name('school-year.store');
     Route::get('/show/{id}', 'show')->name('school-year.show');
-    Route::get('/current', 'current')->name('school-year.current');
     Route::put('/update/{id}', 'update')->name('school-year.update');
     Route::delete('/delete/{id}', 'destroy')->name('school-year.delete');
+    Route::get('/current', 'current')->name('school-year.current');
   });
 
   Route::controller(SemesterController::class)->prefix('semester')->group(function () {
@@ -61,6 +66,46 @@ Route::middleware(['throttle:api-public'])->group(function () {
     Route::get('/show/{id}', 'show')->name('section.show');
     Route::put('/update/{id}', 'update')->name('section.update');
     Route::delete('/delete/{id}', 'destroy')->name('section.delete');
+  });
+
+  Route::controller(SubjectController::class)->prefix('subject')->group(function () {
+    Route::get('/list', 'index')->name('subject.list');
+    Route::post('/store', 'store')->name('subject.store');
+    Route::get('/show/{id}', 'show')->name('subject.show');
+    Route::put('/update/{id}', 'update')->name('subject.update');
+    Route::delete('/delete/{id}', 'destroy')->name('subject.delete');
+  });
+
+  Route::controller(UserRoleController::class)->prefix('user-role')->group(function () {
+    Route::get('/list', 'index')->name('user-role.list');
+    Route::post('/store', 'store')->name('user-role.store');
+    Route::get('/show/{id}', 'show')->name('user-role.show');
+    Route::put('/update/{id}', 'update')->name('user-role.update');
+    Route::delete('/delete/{id}', 'destroy')->name('user-role.delete');
+  });
+
+  Route::controller(EmployeePositionController::class)->prefix('employee-position')->group(function () {
+    Route::get('/list', 'index')->name('employee-position.list');
+    Route::post('/store', 'store')->name('employee-position.store');
+    Route::get('/show/{id}', 'show')->name('employee-position.show');
+    Route::put('/update/{id}', 'update')->name('employee-position.update');
+    Route::delete('/delete/{id}', 'destroy')->name('employee-position.delete');
+  });
+
+  Route::controller(ScheduleCategoryController::class)->prefix('schedule-category')->group(function () {
+    Route::get('/list', 'index')->name('schedule-category.list');
+    Route::post('/store', 'store')->name('schedule-category.store');
+    Route::get('/show/{id}', 'show')->name('schedule-category.show');
+    Route::put('/update/{id}', 'update')->name('schedule-category.update');
+    Route::delete('/delete/{id}', 'destroy')->name('schedule-category.delete');
+  });
+
+  Route::controller(SubjectCategoryController::class)->prefix('subject-category')->group(function () {
+    Route::get('/list', 'index')->name('subject-category.list');
+    Route::post('/store', 'store')->name('subject-category.store');
+    Route::get('/show/{id}', 'show')->name('subject-category.show');
+    Route::put('/update/{id}', 'update')->name('subject-category.update');
+    Route::delete('/delete/{id}', 'destroy')->name('subject-category.delete');
   });
 
 });
