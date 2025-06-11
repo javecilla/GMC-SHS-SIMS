@@ -18,6 +18,7 @@ class YearLevel extends Model
     protected $fillable = [
         'year_level_name',
         'year_level_code',
+        'level_order'
     ];
 
     public $timestamps = true;

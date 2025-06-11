@@ -3,6 +3,9 @@
 use App\Http\Controllers\Api\V1\CampusController;
 use App\Http\Controllers\Api\V1\SchoolYearController;
 use App\Http\Controllers\Api\V1\SemesterController;
+use App\Http\Controllers\Api\V1\YearLevelController;
+use App\Http\Controllers\Api\V1\StrandController;
+use App\Http\Controllers\Api\V1\SectionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -35,6 +38,31 @@ Route::middleware(['throttle:api-public'])->group(function () {
     Route::put('/update/{id}', 'update')->name('semester.update');
     Route::delete('/delete/{id}', 'destroy')->name('semester.delete');
   });
+
+  Route::controller(YearLevelController::class)->prefix('year-level')->group(function () {
+    Route::get('/list', 'index')->name('year-level.list');
+    Route::post('/store', 'store')->name('year-level.store');
+    Route::get('/show/{id}', 'show')->name('year-level.show');
+    Route::put('/update/{id}', 'update')->name('year-level.update');
+    Route::delete('/delete/{id}', 'destroy')->name('year-level.delete');
+  });
+
+  Route::controller(StrandController::class)->prefix('strand')->group(function () {
+    Route::get('/list', 'index')->name('strand.list');
+    Route::post('/store', 'store')->name('strand.store');
+    Route::get('/show/{id}', 'show')->name('strand.show');
+    Route::put('/update/{id}', 'update')->name('strand.update');
+    Route::delete('/delete/{id}', 'destroy')->name('strand.delete');
+  });
+
+  Route::controller(SectionController::class)->prefix('section')->group(function () {
+    Route::get('/list', 'index')->name('section.list');
+    Route::post('/store', 'store')->name('section.store');
+    Route::get('/show/{id}', 'show')->name('section.show');
+    Route::put('/update/{id}', 'update')->name('section.update');
+    Route::delete('/delete/{id}', 'destroy')->name('section.delete');
+  });
+
 });
 
 # --------------------------------

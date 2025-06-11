@@ -92,7 +92,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     ], 500);
                 }
 
-                if ($e instanceof \Illuminate\Http\Exceptions\NotFoundHttpException) {
+                if ($e instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
                     $previous = $e->getPrevious();
                     
                     if ($previous instanceof \Illuminate\Database\Eloquent\ModelNotFoundException) {
