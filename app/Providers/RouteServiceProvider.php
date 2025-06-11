@@ -6,23 +6,18 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 class RouteServiceProvider extends ServiceProvider
 {
-    /**
-     * Register services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap services.
-     */
     public function boot(): void
     {
-        //parent::boot();
+        Route::pattern('id', '[0-9]+');
 
         RateLimiter::for('api-private', function (Request $request) {
             return Limit::perMinute(60)->by(
@@ -30,7 +25,6 @@ class RouteServiceProvider extends ServiceProvider
             );
         });
 
-        // You can also define more named limiters here
         RateLimiter::for('api-public', function (Request $request) {
             return Limit::perMinute(30)->by($request->ip());
         });
