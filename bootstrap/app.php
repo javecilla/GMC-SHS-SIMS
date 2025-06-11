@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -27,25 +26,53 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
-        $middleware->append([
-            // Global middleware here
-            \App\Http\Middleware\HandleCors::class
+        // for things like sessions and CSRF
+        $middleware->priority([
+            \Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            \Illuminate\Session\Middleware\StartSession::class,
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+            \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
+            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            \Illuminate\Routing\Middleware\ThrottleRequests::class,
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests::class,
+            \Illuminate\Auth\Middleware\Authorize::class,
         ]);
 
+        // runs on *all* routes
+        $middleware->append([
+            \App\Http\Middleware\HandleCors::class,
+            // \App\Http\Middleware\EnsureTokenIsValid::class,
+        ]);
+
+        // Web-specific
         $middleware->web(append: [
             \App\Http\Middleware\HandleAppearance::class,
             \App\Http\Middleware\HandleInertiaRequests::class,
-            AddLinkHeadersForPreloadedAssets::class,
+            \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
         ]);
 
+        // API-specific
         $middleware->api(append: [
             \App\Http\Middleware\ForceJsonResponse::class,
             \App\Http\Middleware\TransformApiResponse::class,
             \App\Http\Middleware\LogApiRequests::class,
+
+            \Illuminate\Foundation\Http\Middleware\TrimStrings::class,
+            \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         ]);
 
         $middleware->alias([
             'api.version' => \App\Http\Middleware\ApiVersion::class,
+        ]);
+
+        // replaces Laravel's default stack
+        $middleware->use([
+            \Illuminate\Foundation\Http\Middleware\InvokeDeferredCallbacks::class,
+            \Illuminate\Http\Middleware\TrustProxies::class,
+            \Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance::class,
+            \Illuminate\Http\Middleware\ValidatePostSize::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
