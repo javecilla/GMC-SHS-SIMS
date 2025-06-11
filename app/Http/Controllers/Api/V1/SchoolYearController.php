@@ -10,7 +10,6 @@ use App\Http\Resources\Api\V1\SchoolYearResource;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
-use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 
 class SchoolYearController extends Controller
@@ -25,16 +24,10 @@ class SchoolYearController extends Controller
         return SchoolYearResource::collection($schoolYears);
     }
 
-    public function store(StoreSchoolYearRequest $request): SchoolYearResource | JsonResponse
+    public function store(StoreSchoolYearRequest $request): SchoolYearResource
     {
-        try {
-            $schoolYear = $this->schoolYearService->create($request->validated());
-            return new SchoolYearResource($schoolYear);
-        } catch (QueryException $e) {
-            if ($e->getCode() === '23505' && str_contains($e->getMessage(), 'school_years_single_current')) {
-                return response()->json(['message' => 'Cannot create a school year with "is_current" set to true. Please set the current school year to false first.'], 422);
-            }
-        }
+        $schoolYear = $this->schoolYearService->create($request->validated());
+        return new SchoolYearResource($schoolYear);
     }
 
     public function show(int $id): SchoolYearResource
@@ -49,17 +42,11 @@ class SchoolYearController extends Controller
         return new SchoolYearResource($schoolYear);
     }
 
-    public function update(UpdateSchoolYearRequest $request, int $id): SchoolYearResource | JsonResponse
+    public function update(UpdateSchoolYearRequest $request, int $id): SchoolYearResource
     {
-        try {
-            $schoolYear = $this->schoolYearService->find($id);
-            $schoolYear = $this->schoolYearService->update($schoolYear, $request->validated());
-            return new SchoolYearResource($schoolYear);
-        } catch (QueryException $e) {
-            if ($e->getCode() === '23505' && str_contains($e->getMessage(), 'school_years_single_current')) {
-                return response()->json(['message' => 'Cannot update a school year with "is_current" set to true. Please set the current school year to false first.'], 422);
-            }
-        }
+        $schoolYear = $this->schoolYearService->find($id);
+        $schoolYear = $this->schoolYearService->update($schoolYear, $request->validated());
+        return new SchoolYearResource($schoolYear);
     }
 
     public function destroy(int $id): JsonResponse

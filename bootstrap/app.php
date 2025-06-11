@@ -1,12 +1,12 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Illuminate\Http\Request;
+use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Illuminate\Foundation\Application;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Lottery;
+use Illuminate\Cache\RateLimiting\Limit;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -76,27 +76,58 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
+        $exceptions->stopIgnoring(\Illuminate\Http\Exceptions\HttpException::class);
+
         $exceptions->render(function (Throwable $e, Request $request) {
             if ($request->is('api/*') || $request->expectsJson()) {
-                if ($e instanceof NotFoundHttpException) {
+                if ($e instanceof \App\Exceptions\Api\BaseApiException) {
+                    return $e->render($request);
+                }
+
+                if ($e instanceof \Illuminate\Database\QueryException) {
+                    return response()->json([
+                        'message' => 'A database error occurred.',
+                        'error' => 'QueryException',
+                        'debug' => config('app.debug') ? $e->getMessage() : null,
+                    ], 500);
+                }
+
+                if ($e instanceof \Illuminate\Http\Exceptions\NotFoundHttpException) {
                     $previous = $e->getPrevious();
                     
-                    if ($previous instanceof ModelNotFoundException) {
+                    if ($previous instanceof \Illuminate\Database\Eloquent\ModelNotFoundException) {
                         $model = $previous->getModel();
                         $modelName = basename(str_replace('\\', '/', (is_object($model) ? get_class($model) : $model)));
                         // Get the ID that was searched for
                         $ids = $previous->getIds();
                         $id = is_array($ids) ? implode(', ', $ids) : $ids;
                         
-                        return response()->json(['message' => "{$modelName} with id '{$id}' is not found."], 404);
+                        return response()->json([
+                            'message' => "{$modelName} with id '{$id}' is not found.",
+                            'error' => 'ModelNotFoundException',
+                            'debug' => config('app.debug') ? $e->getMessage() : null,
+                        ], 404);
                     }
                     
-                    return response()->json(['message' => 'Resource not found.'], 404);
+                    return response()->json([
+                        'message' => 'Resource not found.',
+                        'error' => 'NotFoundHttpException',
+                        'debug' => config('app.debug') ? $e->getMessage() : null,
+                    ], 404);
                 }
                 
                 return response()->json(['message' => 'An error occurred.', 'error' => $e->getMessage()], 500);
             }
             
             return null;
+        });
+        
+
+        $exceptions->throttle(function (Throwable $e) {
+            return match (true) {
+                $e instanceof \Illuminate\Broadcasting\BroadcastException => Limit::perMinute(300),
+                $e instanceof \App\Exceptions\ApiMonitoringException => Lottery::odds(1, 1000),
+                default => Limit::none(),
+            };
         });
     })->create();
