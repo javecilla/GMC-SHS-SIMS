@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\Student;
-use App\Enums\ComplterAsEnum;
+use App\Enums\CompleterAsEnum;
 
 class AcademicHistory extends Model
 {
@@ -30,7 +30,7 @@ class AcademicHistory extends Model
     protected function casts(): array {
         return [
             'completion_date' => 'date',
-            'completer_as' => ComplterAsEnum::class,
+            'completer_as' => CompleterAsEnum::class,
         ];
     }
 

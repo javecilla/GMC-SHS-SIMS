@@ -16,7 +16,7 @@ return new class extends Migration
             
             $table->string('year_level_name', 20)->unique()->nullable(false);
             $table->string('year_level_code', 5)->unique()->nullable(false);
-            $table->integer('order_level')->default(false);
+            $table->integer('level_order')->default(false);
 
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP'));

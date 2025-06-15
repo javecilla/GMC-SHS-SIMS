@@ -22,6 +22,12 @@ class UserRoleService
     return UserRole::findOrFail($id);
   }
 
+  //get user role by role name
+  public function findByValue(string $roleName): UserRole
+  {
+    return UserRole::where('role_name', $roleName)->firstOrFail();
+  }
+
   public function update(UserRole $userRole, array $data): UserRole
   {
     $userRole->update($data);

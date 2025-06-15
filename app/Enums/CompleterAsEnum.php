@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum ComplterAsEnum: string
+enum CompleterAsEnum: string
 {
     case ALS = 'Alternative Learning System';
     case JHS = 'Junior High School';

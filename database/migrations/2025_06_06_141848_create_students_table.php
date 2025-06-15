@@ -27,9 +27,7 @@ return new class extends Migration
         Schema::create('students', function (Blueprint $table) {
             $table->id()->primary();
 
-            $table->string('student_no', 100)->unique()->nullable(false);
             $table->string('lrn', 12)->unique()->nullable(true);
-
             $table->string('first_name', 100)->nullable(false);
             $table->string('middle_name', 100)->nullable(true);
             $table->string('last_name', 100)->nullable(false);
@@ -123,7 +121,7 @@ return new class extends Migration
          * Academic History
          */
 
-        Schema::create('academic_history', function (Blueprint $table) {
+        Schema::create('academic_histories', function (Blueprint $table) {
             $table->unsignedBigInteger('student')->nullable(false)->primary();
 
             $table->string('school_name', 200)->nullable(false);
@@ -142,10 +140,10 @@ return new class extends Migration
                 ->onDelete('cascade');
         });
 
-        DB::statement("ALTER TABLE academic_history ADD COLUMN completer_as completer_as DEFAULT 'Junior High School' NOT NULL;");
+        DB::statement("ALTER TABLE academic_histories ADD COLUMN completer_as completer_as DEFAULT 'Junior High School' NOT NULL;");
 
-        DB::statement('CREATE TRIGGER update_academic_history_timestamp
-            BEFORE UPDATE ON academic_history
+        DB::statement('CREATE TRIGGER update_academic_histories_timestamp
+            BEFORE UPDATE ON academic_histories
             FOR EACH ROW
             EXECUTE FUNCTION update_timestamp();
         ');
@@ -318,13 +316,13 @@ return new class extends Migration
         DB::statement('DROP TRIGGER IF EXISTS update_referrals_timestamp ON referrals;');
         DB::statement('DROP TRIGGER IF EXISTS update_freebies_timestamp ON freebies;');
         DB::statement('DROP TRIGGER IF EXISTS update_documents_timestamp ON documents;');
-        DB::statement('DROP TRIGGER IF EXISTS update_academic_history_timestamp ON academic_history;');
+        DB::statement('DROP TRIGGER IF EXISTS update_academic_histories_timestamp ON academic_histories;');
         DB::statement('DROP TRIGGER IF EXISTS update_contact_persons_timestamp ON contact_persons;');
         
         Schema::dropIfExists('referrals');
         Schema::dropIfExists('freebies');
         Schema::dropIfExists('documents');
-        Schema::dropIfExists('academic_history');
+        Schema::dropIfExists('academic_histories');
         Schema::dropIfExists('contact_persons');
         Schema::dropIfExists('students');
 

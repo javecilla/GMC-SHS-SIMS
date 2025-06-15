@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\UserRoleController;
 use App\Http\Controllers\Api\V1\EmployeePositionController;
 use App\Http\Controllers\Api\V1\ScheduleCategoryController;
 use App\Http\Controllers\Api\V1\SubjectCategoryController;
+use App\Http\Controllers\Api\V1\EnrollmentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -108,6 +109,8 @@ Route::middleware(['throttle:api-public'])->group(function () {
     Route::delete('/delete/{id}', 'destroy')->name('subject-category.delete');
   });
 
+  Route::post('/e/student/register', [EnrollmentController::class, 'register'])->name('e.student.register');
+  //Route::post('/e/student/academic', [EnrollmentController::class, 'academic'])->name('e.student.academic');
 });
 
 # --------------------------------

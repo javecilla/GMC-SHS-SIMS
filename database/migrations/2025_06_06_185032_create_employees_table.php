@@ -39,8 +39,6 @@ return new class extends Migration
         Schema::create('employees', function (Blueprint $table) {
             $table->id()->primary();
 
-            $table->string('employee_no', 100)->unique()->nullable(false);
-
             $table->string('first_name', 100)->nullable(false);
             $table->string('middle_name', 100)->nullable(true);
             $table->string('last_name', 100)->nullable(false);

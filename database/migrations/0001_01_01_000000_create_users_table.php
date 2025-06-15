@@ -51,13 +51,14 @@ return new class extends Migration
             $table->unsignedBigInteger('role')->nullable(false);
 
             $table->uuid('user_uid')->default(DB::raw('uuid_generate_v4()'))->unique();
+            $table->string('user_no', 10)->unique()->nullable(false);
             $table->string('email', 100)->unique()->nullable(false);
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('username', 100)->unique()->nullable(false);
+            $table->timestamp('email_verified_at')->nullable(true)->default(null);
             $table->string('password', 255)->nullable(false);
-            $table->string('image_profile', 255)->nullable(true);
+            $table->string('image_profile', 255)->nullable(true)->default(null);
+            $table->string('e_signature', 255)->nullable(true)->default(null);
             // $table->enum('status', ['Active', 'Inactive'])->default('Inactive');
-            $table->timestamp('first_login_at')->nullable(true);
+            $table->timestamp('first_login_at')->nullable(true)->default(null);
 
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP'));
@@ -69,7 +70,7 @@ return new class extends Migration
                 ->onDelete('restrict');
         });
 
-        DB::statement("ALTER TABLE users ADD COLUMN status user_status DEFAULT 'Inactive' NOT NULL");
+        DB::statement("ALTER TABLE users ADD COLUMN user_status user_status DEFAULT 'Inactive' NOT NULL");
 
         DB::statement('CREATE TRIGGER update_users_timestamp
             BEFORE UPDATE ON users
