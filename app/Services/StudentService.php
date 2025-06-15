@@ -18,6 +18,9 @@ use App\Enums\EnrollmentVerificationStatusEnum;
 use App\Helpers\GeneratorHelper;
 use App\Helpers\FormatHelper;
 use App\Helpers\CalculatorHelper;
+use App\Helpers\ScheduleHelper;
+use App\Mail\StudentRegistered;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -110,31 +113,43 @@ class StudentService
           'campus' => $data['campus'],
         ]);
 
-        $registeredStudent = [
-            'enrollment_no' => $enrollment->enrollment_no,
-            'enrollment_date' => Carbon::parse($enrollment->enrollment_date)->format('M j, Y'), //(e.g., 'Jun 6, 2025')
-            'enrollment_status' => $enrollment->enrollment_status,
-            'verification_status' => $enrollment->verification_status,
-            'learning_mode' => $enrollment->learning_mode,
-            'tuition_status' => $enrollment->tuition_status,
-            'student_no' => $user->user_no,
-            'lrn' => $student->lrn,
-            'full_name' => FormatHelper::formatPersonName(
-              $data['last_name'],
-              $data['first_name'],
-              $data['middle_name'],
-              $data['extension_name']
-            ),
-            'first_name' => $student->first_name,
-            'last_name' => $student->last_name,
-            'middle_name' => $student->middle_name,
-            'extension_name' => $student->extension_name,
-            'gender' => $student->gender,
-            'birthdate' => Carbon::parse($data['birthdate'])->format('M j, Y'),
-            'age' => CalculatorHelper::calculateAge($student->birthdate),
-          ];
+        $appointedSchedule = ScheduleHelper::generateStudentAppointment($enrollment->enrollment_date);
 
-          return $registeredStudent;
+        $registeredStudent = [
+          'enrollment_no' => $enrollment->enrollment_no,
+          'enrollment_date' => Carbon::parse($enrollment->enrollment_date)->format('M j, Y'), //(e.g., 'Jun 6, 2025')
+          'enrollment_status' => $enrollment->enrollment_status,
+          'verification_status' => $enrollment->verification_status,
+          'learning_mode' => $enrollment->learning_mode,
+          'tuition_status' => $enrollment->tuition_status,
+          'strand' => $data['strand_name'],
+          'year_level' => $data['year_level_order'],
+          'school_year' => $data['school_year_name'],
+          'semester' => $data['semester_code'],
+          'campus' => $data['campus_name'],
+          'campus_address' => $data['campus_address'],
+          'student_no' => $user->user_no,
+          'lrn' => $student->lrn,
+          'full_name' => FormatHelper::formatPersonName(
+            $data['last_name'],
+            $data['first_name'],
+            $data['middle_name'],
+            $data['extension_name']
+          ),
+          'first_name' => $student->first_name,
+          'last_name' => $student->last_name,
+          'middle_name' => $student->middle_name,
+          'extension_name' => $student->extension_name,
+          'gender' => $student->gender,
+          'birthdate' => Carbon::parse($data['birthdate'])->format('M j, Y'),
+          'age' => CalculatorHelper::calculateAge($student->birthdate),
+          'appointment_schedule' => $appointedSchedule,
+        ];
+
+        //email the appointment schedule to the student registered
+        $emailed = Mail::to($user->email)->send(new StudentRegistered($registeredStudent));
+
+        return $registeredStudent;
       });
     } catch (\Throwable $th) {
       throw $th;

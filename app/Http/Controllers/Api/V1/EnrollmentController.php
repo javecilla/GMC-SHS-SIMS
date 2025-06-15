@@ -36,13 +36,14 @@ class EnrollmentController extends Controller
         $semester = $this->semesterService->find($data['semester']);
         $campus = $this->campusService->find($data['campus']);
 
-        $registeredStudent = $this->studentService->register($data);
+        $data['strand_name']  = $strand->strand_name;
+        $data['year_level_order']  = $yearLevel->level_order;
+        $data['school_year_name']  = $schoolYear->school_year_name;
+        $data['semester_code']  = $semester->semester_name;
+        $data['campus_name']  = $campus->campus_name;
+        $data['campus_address']  = $campus->full_address;
 
-        $registeredStudent['strand']  = $strand->strand_name;
-        $registeredStudent['year_level']  = $yearLevel->level_order;
-        $registeredStudent['school_year']  = $schoolYear->school_year_name;
-        $registeredStudent['semester']  = $semester->semester_code;
-        $registeredStudent['campus']  = $campus->campus_name;
+        $registeredStudent = $this->studentService->register($data);
 
         return response()->json([
             'message' => 'Student registered successfully',

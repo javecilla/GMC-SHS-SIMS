@@ -116,7 +116,10 @@ return Application::configure(basePath: dirname(__DIR__))
                     ], 404);
                 }
                 
-                return response()->json(['message' => 'An error occurred.', 'error' => $e->getMessage()], 500);
+                return response()->json([
+                    'message' => 'An error occurred.',
+                    'error' => $e->getMessage(),
+                ], 500);
             }
             
             return null;

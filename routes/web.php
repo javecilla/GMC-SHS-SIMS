@@ -12,6 +12,7 @@ use App\Enums\LearningModeEnum;
 use App\Enums\TuitionStatusEnum;
 use App\Enums\EnrollmentVerificationStatusEnum;
 use App\Helpers\FormatHelper;
+use App\Helpers\ScheduleHelper;
 use Carbon\Carbon;
 
 Route::get('/', function () {
@@ -20,7 +21,8 @@ Route::get('/', function () {
     //dd(GeneratorHelper::generateFileName('IMG', 'goodmoral', 'jpg'));
     //dd(Carbon::now()->format('Y-m-d'));
     //dd(EnrollmentVerificationStatusEnum::values());
-    dd(FormatHelper::formatPersonName('Avecilla', 'Jerome', 'Sotel'));
+    //dd(FormatHelper::formatPersonName('Avecilla', 'Jerome', 'Sotel', 'Jr.'));
+    dd(ScheduleHelper::generateStudentAppointment('2025-06-15'));
 
     return Inertia::render('Welcome');
 })->name('home');
