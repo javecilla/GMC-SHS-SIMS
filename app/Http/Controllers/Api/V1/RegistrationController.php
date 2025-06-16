@@ -10,11 +10,11 @@ use App\Services\YearLevelService;
 use App\Services\SchoolYearService;
 use App\Services\SemesterService;
 use App\Services\CampusService;
-use App\Http\Requests\Api\V1\StudentEnrollmentRequest;
+use App\Http\Requests\Api\V1\StudentRegistrationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
-class EnrollmentController extends Controller
+class RegistrationController extends Controller
 {
     public function __construct(
         protected StudentService $studentService,
@@ -25,13 +25,11 @@ class EnrollmentController extends Controller
         protected SemesterService $semesterService,
         protected CampusService $campusService,
     ) {}
-    
-    //TODO: Student enrollment for the new academic year
-    public function student(StudentEnrollmentRequest $request): JsonResponse
+
+    public function student(StudentRegistrationRequest $request): JsonResponse
     {
         $data = $request->validated();
         //retrieve info
-        $student = $this->studentService->find($data['student']);
         $strand = $this->strandService->find($data['strand']);
         $yearLevel = $this->yearLevelService->find($data['year_level']);
         $schoolYear = $this->schoolYearService->find($data['school_year']);
@@ -52,8 +50,4 @@ class EnrollmentController extends Controller
             'data' => $registeredStudent
         ], 201);
     }
-
-    //public function section(SectionEnrollmentRequest $request): JsonResponse {...}
-
-    //public function subject(SubjectEnrollmentRequest $request): JsonResponse {...}
 }

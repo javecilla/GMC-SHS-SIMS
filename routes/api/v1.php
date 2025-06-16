@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\V1\EmployeePositionController;
 use App\Http\Controllers\Api\V1\ScheduleCategoryController;
 use App\Http\Controllers\Api\V1\SubjectCategoryController;
 use App\Http\Controllers\Api\V1\EnrollmentController;
+use App\Http\Controllers\Api\V1\RegistrationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -109,8 +110,16 @@ Route::middleware(['throttle:api-public'])->group(function () {
     Route::delete('/delete/{id}', 'destroy')->name('subject-category.delete');
   });
 
-  Route::post('/e/student/register', [EnrollmentController::class, 'register'])->name('e.student.register');
-  //Route::post('/e/student/academic', [EnrollmentController::class, 'academic'])->name('e.student.academic');
+  Route::controller(RegistrationController::class)->prefix('registration')->group(function () {
+    Route::post('/student', 'student')->name('registration.student');
+    //Route::post('/employee', 'employee')->name('registration.student');
+  });
+
+  Route::controller(EnrollmentController::class)->prefix('enrollment')->group(function() {
+    Route::post('/student', 'student')->name('enrollment.student');
+    //Route::post('/section', 'section')->name('enrollment.section');
+    //Route::post('/subject', 'subject')->name('enrollment.subject');
+  });
 });
 
 # --------------------------------

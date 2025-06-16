@@ -33,6 +33,12 @@ class StudentService
     protected UserRoleService $userRoleService
   ) {}
 
+  public function find(int $id): Student
+  {
+    return Student::findOrFail($id);
+  }
+
+  // Registration during admission
   public function register(array $data): ?array
   {
     try {
@@ -99,7 +105,7 @@ class StudentService
         $defaultEnrollmentStatus = EnrollmentStatusEnum::Pending->value;
         $defaultVerificationStatus = EnrollmentVerificationStatusEnum::Pending->value;
 
-        $enrollment = $this->createEnrollment([
+        $enrollment = $this->enroll([
           'enrollment_status' => $defaultEnrollmentStatus,
           'learning_mode' => $data['learning_mode'],
           'tuition_status' => $data['tuition_status'],
@@ -116,8 +122,9 @@ class StudentService
         $appointedSchedule = ScheduleHelper::generateStudentAppointment($enrollment->enrollment_date);
 
         $registeredStudent = [
+          'appointment_schedule' => $appointedSchedule,
           'enrollment_no' => $enrollment->enrollment_no,
-          'enrollment_date' => Carbon::parse($enrollment->enrollment_date)->format('M j, Y'), //(e.g., 'Jun 6, 2025')
+          'enrollment_date' => Carbon::parse($enrollment->enrollment_date)->format('M j, Y'),
           'enrollment_status' => $enrollment->enrollment_status,
           'verification_status' => $enrollment->verification_status,
           'learning_mode' => $enrollment->learning_mode,
@@ -130,33 +137,34 @@ class StudentService
           'campus_address' => $data['campus_address'],
           'student_no' => $user->user_no,
           'lrn' => $student->lrn,
-          'full_name' => FormatHelper::formatPersonName(
-            $data['last_name'],
-            $data['first_name'],
-            $data['middle_name'],
-            $data['extension_name']
-          ),
+          // 'full_name' => FormatHelper::formatPersonName(
+          //   $data['last_name'],
+          //   $data['first_name'],
+          //   $data['middle_name'],
+          //   $data['extension_name']
+          // ),
           'first_name' => $student->first_name,
           'last_name' => $student->last_name,
           'middle_name' => $student->middle_name,
           'extension_name' => $student->extension_name,
-          'gender' => $student->gender,
+          'email' => $user->email,
+          'gender' => $student->gender->value,
           'birthdate' => Carbon::parse($data['birthdate'])->format('M j, Y'),
           'age' => CalculatorHelper::calculateAge($student->birthdate),
-          'appointment_schedule' => $appointedSchedule,
         ];
 
-        //email the appointment schedule to the student registered
-        $emailed = Mail::to($user->email)->send(new StudentRegistered($registeredStudent));
+        $mailer = Mail::to($user->email);
+        $mailer->send(new StudentRegistered($registeredStudent));
 
         return $registeredStudent;
-      });
+      }, 2);
     } catch (\Throwable $th) {
       throw $th;
     }
   }
 
-  public function createEnrollment(array $data): StudentEnrollment
+  // Enrollment for new academic year
+  public function enroll(array $data): StudentEnrollment
   {
     $data['enrollment_no'] = GeneratorHelper::generateEnrollmentNo();
     $data['enrollment_date'] = Carbon::now()->format('Y-m-d');
