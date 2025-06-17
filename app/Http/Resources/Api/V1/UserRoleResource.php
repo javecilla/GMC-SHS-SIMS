@@ -9,6 +9,11 @@ class UserRoleResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        // Add a safety check in case null is passed
+        if (!$this->resource) {
+            return [];
+        }
+        
         return [
             'id' => $this->id,
             'role_name' => $this->role_name,

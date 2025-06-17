@@ -31,6 +31,7 @@ class User extends Authenticatable
         'email_verified_at',
         'password',
         'image_profile',
+        'e_signature',
         'user_status',
         'first_login_at'
     ];

@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\V1\ScheduleCategoryController;
 use App\Http\Controllers\Api\V1\SubjectCategoryController;
 use App\Http\Controllers\Api\V1\EnrollmentController;
 use App\Http\Controllers\Api\V1\RegistrationController;
+use App\Http\Controllers\Api\V1\StudentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -119,6 +120,10 @@ Route::middleware(['throttle:api-public'])->group(function () {
     Route::post('/student', 'student')->name('enrollment.student');
     //Route::post('/section', 'section')->name('enrollment.section');
     //Route::post('/subject', 'subject')->name('enrollment.subject');
+  });
+
+  Route::controller(StudentController::class)->prefix('student')->group(function() {
+    Route::get('/details/{id}', 'getDetails')->name('student.details');
   });
 });
 

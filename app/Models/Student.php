@@ -16,13 +16,13 @@ use App\Models\Freebies;
 use App\Models\Referral;
 use App\Models\StudentEnrollment;
 use App\Models\StudentGrade;
+use Illuminate\Support\Str;
 
 class Student extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'student_no',
         'lrn',
         'first_name',
         'middle_name',
@@ -54,7 +54,22 @@ class Student extends Model
 
     public function getFullNameAttribute(): string
     {
-        return trim("{$this->first_name} {$this->middle_name} {$this->last_name}" . ($this->extension_name ? " {$this->extension_name}" : ''));
+        return $this->first_name . ' ' .
+            ($this->middle_name ? Str::upper(Str::substr($this->middle_name, 0, 1)) . '. ' : '') .
+            $this->last_name .
+            ($this->extension_name ? ' ' . $this->extension_name : '');
+    }
+
+    public function getFullAddressAttribute(): string
+    {
+        $parts = [];
+        if ($this->house_address) $parts[] = $this->house_address;
+        if ($this->barangay) $parts[] = $this->barangay;
+        if ($this->municipality) $parts[] = $this->municipality;
+        if ($this->province) $parts[] = $this->province;
+        if ($this->postal_code) $parts[] = $this->postal_code;
+        
+        return implode(', ', $parts);
     }
 
     public function account(): BelongsTo

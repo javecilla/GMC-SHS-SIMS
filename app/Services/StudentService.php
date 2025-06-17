@@ -38,6 +38,27 @@ class StudentService
     return Student::findOrFail($id);
   }
 
+  public function getDetails(int $id)
+  {
+    $student = Student::with([
+      'account',
+      'account.userRole',
+      'contactPerson',
+      'academicHistory',
+      'document',
+      'studentEnrollments' => function($query) {
+        $query->latest()->first();
+      },
+      'studentEnrollments.strand',
+      'studentEnrollments.yearLevel',
+      'studentEnrollments.schoolYear',
+      'studentEnrollments.semester',
+      'studentEnrollments.campus',
+    ])->findOrFail($id);
+
+    return $student->toArray();
+  }
+
   // Registration during admission
   public function register(array $data): ?array
   {
