@@ -117,6 +117,15 @@ return new class extends Migration
             END$$;
         ");
 
+        DB::statement("
+            DO $$
+            BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'school_status') THEN
+                    CREATE TYPE school_status AS ENUM ('Public', 'Private');
+                END IF;
+            END$$;
+        ");
+
         /**
          * Academic History
          */
@@ -141,6 +150,7 @@ return new class extends Migration
         });
 
         DB::statement("ALTER TABLE academic_histories ADD COLUMN completer_as completer_as DEFAULT 'Junior High School' NOT NULL;");
+        DB::statement("ALTER TABLE academic_histories ADD COLUMN school_status school_status DEFAULT 'Public' NOT NULL;");
 
         DB::statement('CREATE TRIGGER update_academic_histories_timestamp
             BEFORE UPDATE ON academic_histories
@@ -330,6 +340,7 @@ return new class extends Migration
         DB::statement('DROP TYPE IF EXISTS freebies_status;');
         DB::statement("DROP TYPE IF EXISTS document_status_type;");
         DB::statement('DROP TYPE IF EXISTS completer_as;');
+        DB::statement('DROP TYPE IF EXISTS school_status;');
         DB::statement('DROP TYPE IF EXISTS gender;');
     }
 };

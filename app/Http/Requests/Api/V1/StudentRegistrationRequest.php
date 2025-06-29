@@ -5,6 +5,7 @@ namespace App\Http\Requests\Api\V1;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Enums\GenderEnum;
 use App\Enums\CompleterAsEnum;
+use App\Enums\SchoolStatus;
 use App\Enums\EnrollmentStatusEnum;
 use App\Enums\LearningModeEnum;
 use App\Enums\TuitionStatusEnum;
@@ -58,6 +59,7 @@ class StudentRegistrationRequest extends FormRequest
             #academic_histories
             'school_name' => ['required', 'string', 'max:200'],
             'school_address' => ['nullable', 'string', 'max:500'],
+            'school_status' => ['required', 'string', Rule::in(SchoolStatus::values())],
             'completer_as' => ['required', 'string', Rule::in(CompleterAsEnum::values())],
             'completion_date' => ['nullable', 'date'],
             'gwa' => ['nullable', 'numeric'],

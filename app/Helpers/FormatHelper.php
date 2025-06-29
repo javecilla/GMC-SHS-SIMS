@@ -16,4 +16,10 @@ class FormatHelper
 
     return $name;
   }
+
+  public static function formatAddress(string $hAddress, string $barangay, string $municipality, string $province, ?string $postalCode): string
+  {
+    $address = $hAddress . ', ' . $barangay . ', ' . $municipality . ', ' . $province . ', ' . $postalCode;
+    return $address;
+  }
 }

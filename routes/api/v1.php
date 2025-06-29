@@ -123,7 +123,7 @@ Route::middleware(['throttle:api-public'])->group(function () {
   });
 
   Route::controller(StudentController::class)->prefix('student')->group(function() {
-    Route::get('/details/{id}', 'getDetails')->name('student.details');
+    Route::get('/d/academic/{studentNo}', 'getAcademicDetails')->name('student.academic');
   });
 });
 

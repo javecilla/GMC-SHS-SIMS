@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\Student;
 use App\Enums\CompleterAsEnum;
+use App\Enums\SchoolStatus;
 
 class AcademicHistory extends Model
 {
@@ -22,6 +23,7 @@ class AcademicHistory extends Model
         'student',
         'school_name',
         'school_address',
+        'school_status',
         'completion_date',
         'completer_as',
         'gwa',
@@ -31,6 +33,7 @@ class AcademicHistory extends Model
         return [
             'completion_date' => 'date',
             'completer_as' => CompleterAsEnum::class,
+            'school_status' => SchoolStatus::class,
         ];
     }
 

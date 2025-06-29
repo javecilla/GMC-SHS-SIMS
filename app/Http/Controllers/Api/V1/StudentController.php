@@ -14,12 +14,12 @@ class StudentController extends Controller
         protected StudentService $studentService,
     ) {}
 
-    public function getDetails(int $id): JsonResponse
+    public function getAcademicDetails(string $studentNo): JsonResponse
     {
-        $student = $this->studentService->getDetails($id);
-        return response()->json([
-            'message' => 'Student details fetched successfully',
-            'data' => $student,
-        ], 200);
+        $student = $this->studentService->getAcademicDetails($studentNo);
+        // if(!$student) {
+        //     return response()->json(['message' => "Can't find student with no '{$studentNo}'"], 404);
+        // }
+        return response()->json(['message' => 'Student details fetched successfully', 'data' => $student], 200);
     }
 }

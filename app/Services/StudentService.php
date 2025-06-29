@@ -25,6 +25,9 @@ use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use App\Exceptions\Api\V1\StudentNotFoundException;
+use Illuminate\Support\Facades\Log;
+use App\Http\Resources\Api\V1\StudentResource;
 
 class StudentService
 {
@@ -38,7 +41,7 @@ class StudentService
     return Student::findOrFail($id);
   }
 
-  public function getDetails(int $id)
+  public function getAcademicDetails(string $studentNo): StudentResource | array
   {
     $student = Student::with([
       'account',
@@ -46,6 +49,7 @@ class StudentService
       'contactPerson',
       'academicHistory',
       'document',
+      'freebies',
       'studentEnrollments' => function($query) {
         $query->latest()->first();
       },
@@ -54,19 +58,22 @@ class StudentService
       'studentEnrollments.schoolYear',
       'studentEnrollments.semester',
       'studentEnrollments.campus',
-    ])->findOrFail($id);
+    ])->whereHas('account', function($query) use ($studentNo) {
+      $query->where('user_no', $studentNo);
+    })->first();
 
-    return $student->toArray();
+    if(!$student) throw new StudentNotFoundException("Can't find student with no '{$studentNo}'");
+
+    return StudentResource::academic($student->toArray());
   }
 
   // Registration during admission
   public function register(array $data): ?array
   {
     try {
-      // Wrap all database operations in a transaction
       return DB::transaction(function () use ($data) {
         $userNo = GeneratorHelper::generateUserNo();
-        $defaultPassword = Carbon::parse($data['birthdate'])->format('Y') . Str::upper($data['last_name']); //2004AVECILLA
+        $defaultPassword = Carbon::parse($data['birthdate'])->format('Y') . Str::upper($data['last_name']);
         $userRole = $this->userRoleService->findByValue(UserRoleEnum::Student->value);
 
         $user = $this->userService->create([
@@ -117,6 +124,7 @@ class StudentService
           'student' => $student->id,
           'school_name' => $data['school_name'],
           'school_address' => $data['school_address'],
+          'school_status' => $data['school_status'],
           'completion_date' => $data['completion_date'],
           'gwa' => $data['gwa'],
           'completer_as' => $data['completer_as'],
